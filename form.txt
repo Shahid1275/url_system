@@ -1,0 +1,51 @@
+1. React hook form seekho
+2. Form Validation(Zod)
+3. SendUserData(formData) => {
+    axios, fetch => post {...formData} <= url = http://localhost:300/api/auth/signup
+}
+4. Response => check if response is valid
+7. If response is not valid handle error.
+8. Redirect user to homepagec
+
+
+---------------------------------------------------------------------------------
+
+Login/ Signup Logic
+
+1. agar jo logic abhi use ki hoi hai form ki wohi use karni hai to OnSubmit mein aik if else lagana paray ga jo check karay
+ke login wala page hai ya sign up wala.
+
+2. agar login wala page hai to different code cahlay aur jab sign up walal page hai to wo jo abhi likha wa wo chalay
+
+----------------------------------------------------------------------------------
+
+Dashboard:
+
+Search Dashboard Templates
+
+
+
+
+------------------------------------------------------------------------------------
+
+
+Todo:
+
+
+1 - Learn Hooks
+2 - Basic Dom Manilpulation
+3 - Advanded JS (Promises etc)
+4 - Context api
+5 - Flow Of Projects
+6 - Tailwind
+7 - Components Libraries
+8 - Axios / React Query
+9 - JWT Working and Concepts
+10 - Error Handling
+11 - Exception Handling
+12 - RESTful APIS
+13 - Learn to study from Documentation 
+14 - React Router 
+15 - Request sending and esponse recieving
+16 - Response Serialization(Node js)   p
+17 - Authentication and Authorization  p 

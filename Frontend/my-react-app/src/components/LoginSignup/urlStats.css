@@ -1,0 +1,33 @@
+/* UrlStats.css */
+.container {
+    max-width: 1200px;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+  
+  .table {
+    background-color: #f8f9fa;
+  }
+  
+  .table th, .table td {
+    text-align: center;
+  }
+  
+  .list-group-item {
+    transition: background-color 0.3s ease;
+  }
+  
+  .list-group-item:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .alert {
+    font-size: 1.25rem;
+  }
+  

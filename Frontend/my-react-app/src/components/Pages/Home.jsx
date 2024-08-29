@@ -6,6 +6,7 @@ import Sidebar from "../LoginSignup/sideBar";
 import Dashboard from "../LoginSignup/Dashboard";
 import ApiKey from "../LoginSignup/Apikey";
 import UrlStats from "../LoginSignup/UrlStats";
+import { Typography, Box } from "@mui/material";
 import PreGeneratedUrls from "../LoginSignup/pregeneratedurls";
 
 import "./Home.css";
@@ -13,7 +14,9 @@ import MyUrls from "../LoginSignup/MyUrls";
 
 const Home = () => {
   return (
+
     <div className="home-container">
+      
       <Sidebar />
       <div className="content">
         <Routes>
@@ -25,6 +28,7 @@ const Home = () => {
         </Routes>
       </div>
     </div>
+    
   );
 };
 

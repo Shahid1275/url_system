@@ -25,6 +25,10 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    // Remove token from localStorage
+    localStorage.removeItem("token");
+    // Optionally, clear other session data
+    localStorage.removeItem("user_id");
     navigate("/");
   };
 
@@ -149,7 +153,7 @@ const Sidebar = () => {
               "&:hover": {
                 backgroundColor: "#E0E0E0",
                 color: "#D32F2F",
-                cursor: "pointer", 
+                cursor: "pointer",
               },
             }}
           >

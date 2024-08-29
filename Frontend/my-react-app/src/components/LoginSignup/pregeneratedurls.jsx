@@ -1,7 +1,27 @@
+
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Form, Modal } from 'react-bootstrap';
-import { FaEdit, FaTrash, FaCopy } from 'react-icons/fa';
+import {
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  Modal,
+  Typography,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Snackbar,
+  Alert,
+  IconButton
+} from '@mui/material';
 import QRCode from 'qrcode.react';
+import { FaEdit, FaTrash, FaCopy } from 'react-icons/fa';
+import CloseIcon from '@mui/icons-material/Close';
 
 const PreGeneratedUrls = () => {
   // State hooks
@@ -11,10 +31,12 @@ const PreGeneratedUrls = () => {
   const [editingUrlId, setEditingUrlId] = useState(null);
   const [shortUrl, setShortUrl] = useState('');
   const [urlType, setUrlType] = useState('misc');
-  const [urlTag, setUrlTag] = useState([]);
+  const [urlTag, setUrlTag] = useState(1);
   const [generateUrlType, setGenerateUrlType] = useState('misc');
-  const [generateUrlTag, setGenerateUrlTag] = useState(urlTag);
+  const [generateUrlTag, setGenerateUrlTag] = useState(1);
   const [copyMessageId, setCopyMessageId] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     const savedUrls = localStorage.getItem('urls');
@@ -34,8 +56,7 @@ const PreGeneratedUrls = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-            "Authorization": `Bearer ${localStorage.getItem('token')}`,
-          
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({
           quantity,
@@ -52,8 +73,12 @@ const PreGeneratedUrls = () => {
       const newUrls = [...urls, ...data];
       setUrls(newUrls);
       localStorage.setItem('urls', JSON.stringify(newUrls)); // Save to local storage
+      setSnackbarMessage('URLs generated successfully!');
+      setSnackbarOpen(true);
     } catch (error) {
       console.error('Error generating URLs:', error);
+      setSnackbarMessage('Failed to generate URLs.');
+      setSnackbarOpen(true);
     }
   };
 
@@ -76,9 +101,8 @@ const PreGeneratedUrls = () => {
         await fetch(`http://localhost:3000/api/urls/${editingUrlId}`, {
           method: 'PUT',
           headers: {
-            
             'Content-Type': 'application/json',
-            "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
           body: JSON.stringify({
             short_url: shortUrl,
@@ -94,8 +118,12 @@ const PreGeneratedUrls = () => {
         setUrls(updatedUrls);
         localStorage.setItem('urls', JSON.stringify(updatedUrls)); // Update local storage
         handleCloseModal();
+        setSnackbarMessage('URL updated successfully!');
+        setSnackbarOpen(true);
       } catch (error) {
         console.error('Failed to update URL:', error);
+        setSnackbarMessage('Failed to update URL.');
+        setSnackbarOpen(true);
       }
     }
   };
@@ -116,14 +144,18 @@ const PreGeneratedUrls = () => {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-            "Authorization": `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
       });
       const updatedUrls = urls.filter((url) => url.url_id !== urlId);
       setUrls(updatedUrls);
       localStorage.setItem('urls', JSON.stringify(updatedUrls)); // Update local storage
+      setSnackbarMessage('URL deleted successfully!');
+      setSnackbarOpen(true);
     } catch (error) {
       console.error('Failed to delete URL:', error);
+      setSnackbarMessage('Failed to delete URL.');
+      setSnackbarOpen(true);
     }
   };
 
@@ -155,161 +187,182 @@ const PreGeneratedUrls = () => {
 
   return (
     <div>
-      <h2 className="mb-4">Generate Pre-generated URLs</h2>
+      <Typography variant="h4" gutterBottom>
+        Generate Pre-generated URLs
+      </Typography>
 
-      <Form inline>
-        <Form.Group controlId="generateQuantity">
-          <Form.Label className="mr-2">Quantity:</Form.Label>
-          <Form.Control
-            type="number"
-            min="1"
-            value={quantity}
-            onChange={handleQuantityChange}
-            className="mr-2"
-          />
-        </Form.Group>
-        <Form.Group controlId="generateUrlType">
-          <Form.Label className="mr-2">URL Type:</Form.Label>
-          <Form.Control
-            as="select"
-            value={generateUrlType}
-            onChange={handleGenerateUrlTypeChange}
-            className="mr-2"
-          >
-            <option value="misc">Misc</option>
-            <option value="product">Product</option>
-            <option value="store">Store</option>
-          </Form.Control>
-        </Form.Group>
-        <Form.Group controlId="generateUrlTag">
-          <Form.Label className="mr-2">URL Tag:</Form.Label>
-          <Form.Control
-            as="select"
-            value={generateUrlTag}
-            onChange={handleGenerateUrlTagChange}
-            className="mr-2"
-          >
-            <option value="18">New</option>
-            <option value="1">Simple</option>
-            <option value="17">Product</option>
-          </Form.Control>
-        </Form.Group>
-        <Button variant="primary" onClick={generateUrls}>
+      <Box display="flex" flexDirection="row" mb={2}>
+        <TextField
+          label="Quantity"
+          type="number"
+          value={quantity}
+          onChange={handleQuantityChange}
+          InputProps={{ inputProps: { min: 1 } }}
+          sx={{ mr: 2 }}
+        />
+        <Select
+          value={generateUrlType}
+          onChange={handleGenerateUrlTypeChange}
+          displayEmpty
+          sx={{ mr: 2, minWidth: 120 }}
+        >
+          <MenuItem value="misc">Misc</MenuItem>
+          <MenuItem value="product">Product</MenuItem>
+          <MenuItem value="store">Store</MenuItem>
+        </Select>
+        <Select
+          value={generateUrlTag}
+          onChange={handleGenerateUrlTagChange}
+          displayEmpty
+          sx={{ mr: 2, minWidth: 120 }}
+        >
+          <MenuItem value="18">New</MenuItem>
+          <MenuItem value="1">Simple</MenuItem>
+          <MenuItem value="17">Product</MenuItem>
+        </Select>
+        <Button variant="contained" color="primary" onClick={generateUrls}>
           Generate URLs
         </Button>
-      </Form>
+      </Box>
 
-      <Table striped bordered hover className="mt-4">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Short URL</th>
-            <th>Type</th>
-            <th>Tag</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {urls.map((url, index) => (
-            <tr key={url.url_id}>
-              <td>{index + 1}</td>
-              <td>
-                <a href={url.short_url} target="_blank" rel="noopener noreferrer">
-                  {url.short_url}
-                </a>
-              </td>
-              <td>{url.url_type}</td>
-              <td>{getTagNameById(url.tag_id)}</td>
-              <td>
-                <Button variant="info" onClick={() => handleEditUrl(url.url_id)} className="mr-2">
-                  <FaEdit />
-                </Button>
-                <Button variant="danger" onClick={() => handleDeleteUrl(url.url_id)} className="mr-2">
-                  <FaTrash />
-                </Button>
-                <div style={{ position: 'relative', display: 'inline-block' }}>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>#</TableCell>
+              <TableCell>Short URL</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Tag</TableCell>
+              <TableCell>QR Code</TableCell> {/* New column for QR Code */}
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {urls.map((url, index) => (
+              <TableRow key={url.url_id}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>
+                  <a href={url.short_url} target="_blank" rel="noopener noreferrer">
+                    {url.short_url}
+                  </a>
+                </TableCell>
+                <TableCell>{url.url_type}</TableCell>
+                <TableCell>{getTagNameById(url.tag_id)}</TableCell>
+                <TableCell>
+                  <QRCode value={url.short_url} size={60} /> {/* QR Code for each URL */}
+                </TableCell>
+                <TableCell>
                   <Button
-                    variant="secondary"
+                    variant="contained"
+                    color="info"
+                    onClick={() => handleEditUrl(url.url_id)}
+                    sx={{ mr: 1 }}
+                  >
+                    <FaEdit />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => handleDeleteUrl(url.url_id)}
+                    sx={{ mr: 1 }}
+                  >
+                    <FaTrash />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="success"
                     onClick={() => handleCopyToClipboard(url.short_url, url.url_id)}
-                    className="mr-2"
                   >
                     <FaCopy />
                   </Button>
-                  {copyMessageId === url.url_id && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '-30px',
-                        left: '0',
-                        backgroundColor: '#28a745',
-                        color: '#fff',
-                        fontWeight: 'bold',
-                        padding: '5px 10px',
-                        borderRadius: '4px',
-                        boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-                        zIndex: 1,
-                      }}
-                    >
-                       copied!
-                    </div>
-                  )}
-                </div>
-                <QRCode value={url.short_url} size={50} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+                  {copyMessageId === url.url_id && <Typography variant="body2" color="textSecondary">Copied!</Typography>}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit URL</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group controlId="editShortUrl">
-              <Form.Label>Short URL</Form.Label>
-              <Form.Control
-                type="text"
-                value={shortUrl}
-                onChange={(e) => setShortUrl(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="editUrlType">
-              <Form.Label>URL Type</Form.Label>
-              <Form.Control
-                as="select"
-                value={urlType}
-                onChange={(e) => setUrlType(e.target.value)}
-              >
-                <option value="misc">Misc</option>
-                <option value="product">Product</option>
-                <option value="store">Store</option>
-              </Form.Control>
-            </Form.Group>
-            <Form.Group controlId="editUrlTag">
-              <Form.Label>URL Tag</Form.Label>
-              <Form.Control
-                as="select"
-                value={urlTag}
-                onChange={(e) => setUrlTag(parseInt(e.target.value))}
-              >
-                <option value="18">New</option>
-                <option value="1">Simple</option>
-                <option value="17">Product</option>
-              </Form.Control>
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleSaveChanges}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
+      <Modal
+        open={showModal}
+        onClose={handleCloseModal}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            borderRadius: 1,
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Edit URL
+          </Typography>
+          <TextField
+            fullWidth
+            label="Short URL"
+            value={shortUrl}
+            onChange={(e) => setShortUrl(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <Select
+            fullWidth
+            value={urlType}
+            onChange={(e) => setUrlType(e.target.value)}
+            sx={{ mb: 2 }}
+          >
+            <MenuItem value="misc">Misc</MenuItem>
+            <MenuItem value="product">Product</MenuItem>
+            <MenuItem value="store">Store</MenuItem>
+          </Select>
+          <Select
+            fullWidth
+            value={urlTag}
+            onChange={(e) => setUrlTag(parseInt(e.target.value))}
+            sx={{ mb: 2 }}
+          >
+            <MenuItem value="18">New</MenuItem>
+            <MenuItem value="1">Simple</MenuItem>
+            <MenuItem value="17">Product</MenuItem>
+          </Select>
+          <Box display="flex" justifyContent="flex-end">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSaveChanges}
+              sx={{ mr: 1 }}
+            >
+              Save
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleCloseModal}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Box>
       </Modal>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

@@ -1,15 +1,30 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./LoginSignup.css";
-import user_icon from "../Assets/person.png";
-import email_icon from "../Assets/email.png";
-import password_icon from "../Assets/password.png";
+import {
+  TextField,
+  Button,
+  FormControl,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Typography,
+  Alert,
+  IconButton,
+  Box,
+  InputAdornment,
+  Fade,
+} from "@mui/material";
 import { useState } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
-
+import {
+  Visibility,
+  VisibilityOff,
+  Person,
+  Email,
+  Lock,
+} from "@mui/icons-material";
 const schema = z.object({
   username: z.string().min(3, "Username is required"),
   email: z.string().email("Invalid email address").optional(),
@@ -19,9 +34,10 @@ const schema = z.object({
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = React.useState(true);
-  const [token, setToken] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState(''); // New state for error message
+  const [showPassword, setShowPassword] = useState(false);
+  const [token, setToken] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const {
@@ -41,8 +57,8 @@ const LoginSignup = () => {
   const toggleForm = () => {
     setIsLogin(!isLogin);
     reset();
-    setSuccessMessage(''); // Clear success message when toggling forms
-    setErrorMessage(''); // Clear error message when toggling forms
+    setSuccessMessage("");
+    setErrorMessage("");
   };
 
   const onSubmit = async (data) => {
@@ -51,51 +67,48 @@ const LoginSignup = () => {
       const endpoint = isLogin
         ? "http://localhost:3000/api/auth/login"
         : "http://localhost:3000/api/auth/signup";
-  
+
       const requestData = {
         username: parsedData.username,
         password_hash: parsedData.password,
       };
-  
+
       if (!isLogin) {
         requestData.email = parsedData.email;
         requestData.role_id = parsedData.role === "admin" ? 1 : 2;
       }
-  
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-          
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestData),
       });
-  
+
       const result = await response.json();
       setToken(result.token);
       localStorage.setItem("token", result.token);
-      
+
       if (response.ok) {
         if (isLogin) {
           const decoded = jwtDecode(result.token);
           localStorage.setItem("user_id", decoded.userId);
           reset();
           setSuccessMessage("Login successful!");
-          setTimeout(() => {
-            navigate("/home");
-          }, 1500);
+          navigate("/home");
         } else {
           setSuccessMessage("Signup successful! Please log in.");
           setTimeout(() => {
-            toggleForm(); // Delay toggling the form
-          }, 1500); // Show success message for 1.5 seconds
+            toggleForm();
+          }, 1500);
         }
       } else {
-        if (response.status === 409) {
-          setErrorMessage("Username or email already exists.");
-        } else {
-          setErrorMessage(result.error || "An error occurred. Please try again.");
-        }
+        setErrorMessage(
+          response.status === 409
+            ? "Username or email already exists."
+            : result.error || "An error occurred. Please try again."
+        );
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -105,86 +118,170 @@ const LoginSignup = () => {
       }
     }
   };
-  
 
   return (
-    <div className="login-signup-container">
-      <div className="form-container">
-        {successMessage && <div className="alert alert-success">{successMessage}</div>}
-        {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} {/* Display error message */}
-        <h2>{isLogin ? "Login" : "Signup"}</h2>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="input-group">
-            <img src={user_icon} alt="User Icon" className="icon" />
-            <input
-              type="text"
-              placeholder="Username"
-              {...register("username")}
-            />
-            {errors.username && (
-              <p className="error-text">{errors.username.message}</p>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" }, // Column on small screens, row on larger screens
+        minHeight: "100vh",
+        overflow: "hidden",
+      }}
+    >
+      <div style={{display:'flex',flexDirection:'row',alignItems:'center',}}>
+        <div>
+          <img src="Mobile login-pana.png" height={500}></img>
+        </div>
+        {/* Form Section */}
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 3,
+            maxWidth: 400,
+            margin: "auto",
+            backgroundColor: "white",
+            borderRadius: 2,
+            boxShadow: 3,
+            transition: "transform 0.3s ease-in-out",
+            "&:hover": {
+              transform: "scale(1.02)",
+            },
+            zIndex: 1,
+          }}
+        >
+          <Box sx={{ width: "100%" }}>
+            {successMessage && (
+              <Alert severity="success">{successMessage}</Alert>
             )}
-          </div>
-          {!isLogin && (
-            <div className="input-group">
-              <img src={email_icon} alt="Email Icon" className="icon" />
-              <input type="email" placeholder="Email" {...register("email")} />
-              {errors.email && (
-                <p className="error-text">{errors.email.message}</p>
+            {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+
+            <Fade in timeout={1000}>
+              <Typography
+                variant="h4"
+                gutterBottom
+                sx={{
+                  marginBottom: 3,
+                  textAlign: "center",
+                  color: "#333",
+                }}
+              >
+                Welcome to Our Service
+              </Typography>
+            </Fade>
+
+            <Typography variant="h5" gutterBottom textAlign="center">
+              {isLogin ? "Login" : "Signup"}
+            </Typography>
+
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <TextField
+                label="Username"
+                fullWidth
+                margin="normal"
+                {...register("username")}
+                error={Boolean(errors.username)}
+                helperText={errors.username?.message}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Person />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {!isLogin && (
+                <TextField
+                  label="Email"
+                  type="email"
+                  fullWidth
+                  margin="normal"
+                  {...register("email")}
+                  error={Boolean(errors.email)}
+                  helperText={errors.email?.message}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
               )}
-            </div>
-          )}
-          <div className="input-group">
-            <img src={password_icon} alt="Password Icon" className="icon" />
-            <input
-              type="password"
-              placeholder="Password"
-              {...register("password")}
-            />
-            {errors.password && (
-              <p className="error-text">{errors.password.message}</p>
-            )}
-          </div>
-          {!isLogin && (
-            <div className="role-selection">
-              <label className="role-label">Select Role:</label>
-              <div className="role-options">
-                <div className="form-check form-check-inline">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    value="user"
-                    {...register("role")}
-                  />
-                  <label className="form-check-label">User</label>
-                </div>
-                <div className="form-check form-check-inline">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    value="admin"
-                    {...register("role")}
-                  />
-                  <label className="form-check-label">Admin</label>
-                </div>
-              </div>
-              {errors.role && (
-                <p className="error-text">{errors.role.message}</p>
+
+              <FormControl fullWidth margin="normal">
+                <TextField
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  fullWidth
+                  {...register("password")}
+                  error={Boolean(errors.password)}
+                  helperText={errors.password?.message}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          edge="end"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </FormControl>
+
+              {!isLogin && (
+                <FormControl component="fieldset" fullWidth margin="normal">
+                  <Typography variant="subtitle1">Select Role:</Typography>
+                  <RadioGroup row {...register("role")}>
+                    <FormControlLabel
+                      value="user"
+                      control={<Radio />}
+                      label="User"
+                    />
+                    <FormControlLabel
+                      value="admin"
+                      control={<Radio />}
+                      label="Admin"
+                    />
+                  </RadioGroup>
+                </FormControl>
               )}
-            </div>
-          )}
-          <button type="submit" className="submit-btn">
-            {isLogin ? "Login" : "Signup"}
-          </button>
-        </form>
-        <p className="toggle-text">
-          {isLogin ? "Don't have an account?" : "Already have an account?"}
-          <span className="toggle-link" onClick={toggleForm}>
-            {isLogin ? " Signup" : " Login"}
-          </span>
-        </p>
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+              >
+                {isLogin ? "Login" : "Signup"}
+              </Button>
+
+              <Typography variant="body2" align="center" marginTop={2}>
+                {isLogin
+                  ? "Don't have an account?"
+                  : "Already have an account?"}
+                <Button onClick={toggleForm} color="primary">
+                  {isLogin ? " Signup" : " Login"}
+                </Button>
+              </Typography>
+            </form>
+          </Box>
+        </Box>
       </div>
-    </div>
+
+      {/* Image Section */}
+    </Box>
   );
 };
 

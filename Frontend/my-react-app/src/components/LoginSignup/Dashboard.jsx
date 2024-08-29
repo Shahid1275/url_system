@@ -6,9 +6,33 @@ import "react-datepicker/dist/react-datepicker.css";
 import { styled } from '@mui/material/styles';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
+  padding: theme.spacing(4),
+  marginTop: theme.spacing(4),
+  boxShadow: theme.shadows[6],
+  borderRadius: theme.shape.borderRadius,
+  background: theme.palette.background.default,
+  maxWidth: '600px',
+  margin: 'auto',
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  borderRadius: '20px',
+  fontWeight: 'bold',
+  padding: theme.spacing(1.5),
+  '&:hover': {
+    backgroundColor: theme.palette.primary.dark,
+    transform: 'scale(1.05)',
+    transition: 'all 0.3s ease',
+  },
+}));
+
+const StyledAlert = styled(Alert)(({ theme }) => ({
   marginTop: theme.spacing(2),
-  boxShadow: theme.shadows[5],
+  fontWeight: 'bold',
+  borderRadius: theme.shape.borderRadius,
+  '& .MuiAlert-icon': {
+    fontSize: '2rem',
+  },
 }));
 
 const Dashboard = () => {
@@ -25,17 +49,16 @@ const Dashboard = () => {
   const handleGenerateShortUrl = async () => {
     if (!originalUrl) {
       setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 2000);
       return;
     }
 
     try {
       const response = await fetch("http://localhost:3000/api/urls", {
         method: "POST",
-         
         headers: {
           "Content-Type": "application/json",
-          "Authorization": 'Bearer ' + localStorage.getItem('token')
-          
+          "Authorization": 'Bearer ' + localStorage.getItem('token'),
         },
         body: JSON.stringify({
           original_url: originalUrl,
@@ -54,10 +77,12 @@ const Dashboard = () => {
         setShowAlert(false);
       } else {
         setShowAlert(true);
+        setTimeout(() => setShowAlert(false), 2000); // Set alert timeout for 2 seconds
       }
     } catch (error) {
       console.error("Error generating short URL:", error);
       setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 2000); // Set alert timeout for 2 seconds
     }
   };
 
@@ -79,11 +104,11 @@ const Dashboard = () => {
 
   return (
     <StyledPaper>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" color="primary" gutterBottom align="center" fontWeight="bold">
         URL Shortener Dashboard
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={4}>
         <Grid item xs={12}>
           <TextField
             label="Original URL"
@@ -91,6 +116,9 @@ const Dashboard = () => {
             fullWidth
             value={originalUrl}
             onChange={(e) => setOriginalUrl(e.target.value)}
+            InputProps={{
+              style: { borderRadius: '10px' },
+            }}
           />
         </Grid>
 
@@ -101,6 +129,7 @@ const Dashboard = () => {
               value={urlType}
               onChange={(e) => setUrlType(e.target.value)}
               label="Type of URL"
+              style={{ borderRadius: '10px' }}
             >
               <MenuItem value="store">Store</MenuItem>
               <MenuItem value="misc">Misc</MenuItem>
@@ -116,6 +145,7 @@ const Dashboard = () => {
               value={urlTag}
               onChange={(e) => setUrlTag(e.target.value)}
               label="URL Tag"
+              style={{ borderRadius: '10px' }}
             >
               <MenuItem value="">Select Tag</MenuItem>
               <MenuItem value="1">Simple</MenuItem>
@@ -137,52 +167,55 @@ const Dashboard = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <Button
+          <StyledButton
             variant="contained"
             color="primary"
             fullWidth
             onClick={handleGenerateShortUrl}
           >
             Generate Short URL
-          </Button>
+          </StyledButton>
         </Grid>
       </Grid>
 
       {showAlert && (
-        <Alert severity="error" style={{ marginTop: '16px' }}>
+        <StyledAlert severity="error">
           An error occurred while generating the short URL. Please try again.
-        </Alert>
+        </StyledAlert>
       )}
 
       {copySuccess && (
-        <Alert severity="success" style={{ marginTop: '16px' }}>
+        <StyledAlert severity="success">
           URL copied to clipboard!
-        </Alert>
+        </StyledAlert>
       )}
 
       {shortUrl && (
-        <div style={{ marginTop: '16px' }}>
-          <Typography variant="body1">
-            Your generated short URL:{" "}
-            <a href={shortUrl} target="_blank" rel="noopener noreferrer">
+        <div style={{ marginTop: '24px', textAlign: 'center' }}>
+          <Typography variant="h6" color="textSecondary">
+            Your generated short URL:
+          </Typography>
+          <Typography variant="body1" style={{ wordWrap: 'break-word' }}>
+            <a href={shortUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#007bff', textDecoration: 'none' }}>
               {shortUrl}
             </a>
           </Typography>
-          <Button
+          <StyledButton
             variant="outlined"
             color="primary"
             onClick={() => handleCopyToClipboard(shortUrl)}
+            style={{ marginTop: '16px' }}
           >
             Copy
-          </Button>
-          <Button
+          </StyledButton>
+          <StyledButton
             variant="contained"
             color="secondary"
             onClick={() => handleDownloadUrl(shortUrl)}
-            style={{ marginLeft: '16px' }}
+            style={{ marginTop: '16px', marginLeft: '16px' }}
           >
             Download
-          </Button>
+          </StyledButton>
         </div>
       )}
     </StyledPaper>

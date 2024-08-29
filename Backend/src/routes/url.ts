@@ -4,7 +4,7 @@ import { redirectUrl} from '../controllers/redirectUrl';
 import { authMiddleware } from '../middlewares/auth';
 
 const router = express.Router();
-router.get('/redirect/:short_url',authMiddleware, redirectUrl);
+router.get('/redirect/:short_url', redirectUrl);
 router.get('/', authMiddleware, getAllUrls);
  router.get('/:id',authMiddleware,  getUrlById);
 router.post('/', authMiddleware, createUrl);

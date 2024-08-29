@@ -1,79 +1,4 @@
-/* .login-signup-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #063b8b;
-  }
-  
-  .form-container {
-    background-color: #fff;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    text-align: center;
-  }
-  
-  .form-container h2 {
-    margin-bottom: 20px;
-    color: #652020;
-  }
-  
-  .input-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-  
-  .input-group .icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 10px;
-  }
-  
-  .input-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-  }
-  
-  .submit-btn {
-    width: 100%;
-    padding: 10px;
-    background-color: #4caf50;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .submit-btn:hover {
-    background-color: #45a049;
-  }
-  
-  .toggle-text {
-    margin-top: 20px;
-    color: #555;
-  }
-  
-  .toggle-link {
-    color: #4caf50;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  
-  .toggle-link:hover {
-    text-decoration: underline;
-  }
-  p{
-    color: black;
-  }
-   */
+/* 
 
    .login-signup-container {
     display: flex;
@@ -182,4 +107,49 @@
   .toggle-link:hover {
     text-decoration: underline;
   }
-  
+   */
+
+   /* Center the container horizontally and vertically */
+.login-signup-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  justify-content: center; /* Center horizontally */
+  align-items: center;     /* Center vertically */
+}
+
+/* Style the form container */
+.form-container {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%; /* Ensure it takes full width within its max-width */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* Optional: Style for the image container */
+.image-container {
+  flex: 1;
+  background: url('/Frontend/my-react-app/src/components/Assets/URL Shortener-590x295.png') no-repeat center center;
+  background-size: cover;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-box {
+  text-align: center;
+}
+
+.welcome-text {
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+input[type="text"], input[type="password"], input[type="email"] {
+  margin-bottom: 20px;
+}

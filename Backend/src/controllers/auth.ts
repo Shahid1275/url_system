@@ -27,7 +27,7 @@ export const signup = async (req: Request, res: Response) => {
   const result = signupSchema.safeParse(req.body);
 
   if (!result.success) {
-    return res.status(400).json({ message: 'Invalid input', errors: result.error.errors });
+    return res.status(400).json({ message: 'Invalid input here', errors: result.error.errors });
   }
   else{
     const { email, password_hash, username, role_id } = result.data;
@@ -45,10 +45,10 @@ export const signup = async (req: Request, res: Response) => {
           role_id,
         },
       });
-      console.log(newUser, ":::::::::::");
+      // console.log(newUser, ":::::::::::");
       res.json(newUser);
     } catch (error) {
-      console.log(error, "@@@@@");
+      // console.log(error, "@@@@@");
       return res.status(500).send({ error });
     }
   };
@@ -60,40 +60,46 @@ export const login = async (req: Request, res: Response) => {
   if (!result.success) {
     return res.status(400).json({ message: 'Invalid input', errors: result.error.errors });
   }
-  else{
 
-    const { username, password_hash } = result.data;
+  const { username, password_hash } = result.data;
 
   try {
-    let user = await prismaClient.user.findFirst({ where: { username } });
-    console.log("USER = ",user);
+    // Find the user by username
+    const user = await prismaClient.user.findFirst({ where: { username } });
+
+    // Check if user exists
     if (!user) {
-      return res.status(404).send('User does not exist!');
+      return res.status(404).json({ message: 'Your credentials do not match!' });
     }
 
-    if (!compareSync(password_hash, user.password_hash)) {
-      return res.status(400).send('Incorrect password!');
+    // Compare the input password with the stored hashed password
+    const passwordMatch = compareSync(password_hash, user.password_hash);
+    if (!passwordMatch) {
+      return res.status(400).json({ message: 'Your credentials do not match!' });
     }
 
+    // If credentials are correct, sign and return the JWT token
     const token = jwt.sign(
-      { 
+      {
         userId: user.user_id,
         username: user.username,
-        email: user.email,  
-        role_id: user.role_id
+        email: user.email,
+        role_id: user.role_id,
       },
-      JWT_SECRET
+      JWT_SECRET,
+      { expiresIn: '1h' } // Token expiration time
     );
-    console.log("token = ",token);
-    res.json({ token });
-   
+
+    console.log("Token generated:", token);
+    return res.json({ token });
 
   } catch (error) {
-    console.log(error, "@@@@@");
-    return res.status(500).send({ error });
+    console.error('Login error:', error);
+    return res.status(500).send({ error: 'An error occurred while processing your request' });
+
   }
-  }
-}
+};
+
   export const getUserRoles = async (req: Request, res: Response) => {
     try {
       const roles = await prismaClient.user_role.findMany({ where: { is_deleted: false } });

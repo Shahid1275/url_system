@@ -1,4 +1,6 @@
-import React from "react";
+
+
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -15,38 +17,27 @@ import {
   InputAdornment,
   Fade,
 } from "@mui/material";
-import { useState } from "react";
-import { jwtDecode } from "jwt-decode";
+import { Visibility, VisibilityOff, Person, Email, Lock } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import {
-  Visibility,
-  VisibilityOff,
-  Person,
-  Email,
-  Lock,
-} from "@mui/icons-material";
+import { jwtDecode } from "jwt-decode";
+
+// Define your validation schema
 const schema = z.object({
-  username: z.string().min(3, "Username is required"),
+  username: z.string().min(5, "Username must be at least 5 characters long"),
   email: z.string().email("Invalid email address").optional(),
   password: z.string().min(6, "Password must be at least 6 characters long"),
   role: z.enum(["user", "admin"], "Role is required").optional(),
 });
 
 const LoginSignup = () => {
-  const [isLogin, setIsLogin] = React.useState(true);
+  const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [token, setToken] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    reset,
-    formState: { errors },
-  } = useForm({
+  const { register, handleSubmit, setError, reset, formState: { errors } } = useForm({
     defaultValues: {
       username: "",
       password: "",
@@ -54,6 +45,7 @@ const LoginSignup = () => {
     },
   });
 
+  // Toggle between login and signup forms
   const toggleForm = () => {
     setIsLogin(!isLogin);
     reset();
@@ -63,11 +55,13 @@ const LoginSignup = () => {
 
   const onSubmit = async (data) => {
     try {
+      // Validate data against schema
       const parsedData = schema.parse(data);
       const endpoint = isLogin
         ? "http://localhost:3000/api/auth/login"
         : "http://localhost:3000/api/auth/signup";
 
+      // Prepare request data
       const requestData = {
         username: parsedData.username,
         password_hash: parsedData.password,
@@ -78,6 +72,7 @@ const LoginSignup = () => {
         requestData.role_id = parsedData.role === "admin" ? 1 : 2;
       }
 
+      // Send request to the API
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -86,29 +81,36 @@ const LoginSignup = () => {
         body: JSON.stringify(requestData),
       });
 
+      // Process API response
       const result = await response.json();
-      setToken(result.token);
-      localStorage.setItem("token", result.token);
 
       if (response.ok) {
+        setToken(result.token);
+        localStorage.setItem("token", result.token);
         if (isLogin) {
           const decoded = jwtDecode(result.token);
           localStorage.setItem("user_id", decoded.userId);
           reset();
-          setSuccessMessage("Login successful!");
-          navigate("/home");
+          navigate("/home/dashboard"); // Navigate to dashboard on successful login
         } else {
           setSuccessMessage("Signup successful! Please log in.");
-          setTimeout(() => {
-            toggleForm();
-          }, 1500);
+             // Reset the form and hide success message after 3 seconds
+        setTimeout(() => {
+          setSuccessMessage("");
+          reset();
+        }, 3000);
         }
       } else {
         setErrorMessage(
           response.status === 409
             ? "Username or email already exists."
-            : result.error || "An error occurred. Please try again."
+            : result.message || "An error occurred. Please try again."
         );
+
+        // Hide the error message after 3 seconds
+        setTimeout(() => {
+          setErrorMessage("");
+        }, 3000);
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -128,9 +130,9 @@ const LoginSignup = () => {
         overflow: "hidden",
       }}
     >
-      <div style={{display:'flex',flexDirection:'row',alignItems:'center',}}>
+      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
         <div>
-          <img src="Mobile login-pana.png" height={500}></img>
+          <img src="Mobile login-pana.png" height={500} alt="Login Illustration" />
         </div>
         {/* Form Section */}
         <Box
@@ -154,9 +156,15 @@ const LoginSignup = () => {
         >
           <Box sx={{ width: "100%" }}>
             {successMessage && (
-              <Alert severity="success">{successMessage}</Alert>
+              <Alert severity="success" sx={{ marginBottom: 2 }}>
+                {successMessage}
+              </Alert>
             )}
-            {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+            {errorMessage && (
+              <Alert severity="error" sx={{ marginBottom: 2 }}>
+                {errorMessage}
+              </Alert>
+            )}
 
             <Fade in timeout={1000}>
               <Typography
@@ -240,7 +248,7 @@ const LoginSignup = () => {
                 />
               </FormControl>
 
-              {!isLogin && (
+              {/* {!isLogin && (
                 <FormControl component="fieldset" fullWidth margin="normal">
                   <Typography variant="subtitle1">Select Role:</Typography>
                   <RadioGroup row {...register("role")}>
@@ -256,7 +264,7 @@ const LoginSignup = () => {
                     />
                   </RadioGroup>
                 </FormControl>
-              )}
+              )} */}
 
               <Button
                 type="submit"
@@ -279,8 +287,6 @@ const LoginSignup = () => {
           </Box>
         </Box>
       </div>
-
-      {/* Image Section */}
     </Box>
   );
 };

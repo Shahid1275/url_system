@@ -18,7 +18,7 @@ const Home = () => {
     <div className="home-container">
       
       <Sidebar />
-      <div className="content">
+      <div style={{ margin: 'auto' }} className="content">
         <Routes>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="apikey" element={<ApiKey />} />
